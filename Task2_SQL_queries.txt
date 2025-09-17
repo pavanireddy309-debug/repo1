@@ -1,0 +1,139 @@
+
+-- Create Student Table
+CREATE TABLE student (
+    student_id INT PRIMARY KEY AUTO_INCREMENT,
+    student_name VARCHAR(100),
+    gender VARCHAR(10),
+    dob DATE,
+    class VARCHAR(20)
+);
+
+-- Create Student Marks Table
+CREATE TABLE student_marks (
+    mark_id INT PRIMARY KEY AUTO_INCREMENT,
+    student_id INT,
+    subject VARCHAR(50),
+    marks INT,
+    exam_date DATE,
+    FOREIGN KEY (student_id) REFERENCES student(student_id)
+);
+
+-- Insert data into student table
+INSERT INTO student (student_name, gender, dob, class) VALUES
+('Alice', 'F', '2006-05-12', '10A'),
+('Bob', 'M', '2004-11-23', '12B'),
+('Charlie', 'M', '2007-07-30', '9C'),
+('Diana', 'F', '2005-01-15', '11A'),
+('Eve', 'F', '2008-03-02', '8B'),
+('john', 'M', '2009-05-06', '9B');
+
+-- Insert data into student_marks table
+INSERT INTO student_marks (student_id, subject, marks, exam_date) VALUES
+(1, 'Math', 95, '2023-01-10'),
+(1, 'Science', 88, '2025-01-15'),
+(2, 'Math', 72, '2025-03-05'),
+(2, 'History', 90, '2025-01-01'),
+(3, 'Math', 55, '2024-12-22'),
+(3, 'Science', 60, '2025-01-05'),
+(4, 'History', 45, '2025-03-01'),
+(5, 'Math', 35, '2025-04-10');
+  
+
+-- 1.Write a query to list all students with their marks (INNER JOIN)
+SELECT student.student_id, student.student_name, student_marks.subject, student_marks.marks
+FROM student 
+INNER JOIN student_marks ON student.student_id = student_marks.student_id;
+
+-- 2.Show all students, including those who don’t have marks yet (LEFT JOIN).
+SELECT student.student_id, student.student_name, student_marks.subject, student_marks.marks
+FROM student 
+LEFT JOIN student_marks ON student.student_id = student_marks.student_id;
+
+-- 3.Find students who appeared in exams after ‘2025-01-01’
+SELECT student.student_id,student.student_name,student_marks.subject,student_marks.marks
+from student
+join student_marks on student.student_id=student_marks.student_id
+where exam_date>'2025-01-01';
+
+-- 4.List students with their total marks across all subjects.
+select student.student_id,student.student_name,SUM(student_marks.marks) AS total_marks
+from student join student_marks on student.student_id=student_marks.student_id
+group by student_id,student_name;
+
+-- 5.Find the highest mark in each subject with student details.
+SELECT s.student_id, s.student_name, sm.subject, sm.marks AS max_marks 
+FROM student s
+JOIN student_marks sm ON s.student_id = sm.student_id
+WHERE sm.marks = (
+    SELECT MAX(marks)
+    FROM student_marks 
+    WHERE subject = sm.subject
+);
+
+-- 6.Use AVG() to find the average marks per subject
+select student_marks.subject,AVG(student_marks.marks) AS avg_marks
+from student_marks
+group by subject;
+
+-- 7.Use COUNT() to find how many subjects each student appeared in
+select student.student_id,student.student_name,COUNT(student_marks.subject) AS subject_count
+from student join student_marks on student.student_id=student_marks.student_id
+group by student_name,student_id;
+
+-- 8.Use ROUND() to display percentage (marks/total * 100) rounded to 2 decimals.
+select student.student_name,ROUND((student_marks.marks/100)*100,2) AS percentage,student_marks.subject
+from student join student_marks on student.student_id=student_marks.student_id
+;
+
+-- 9.Use UPPER() to display all student names in uppercase.
+select student.student_id,UPPER(student.student_name) as upper_std_names
+from student;
+-- 10.Use YEAR(dob) to find students born after 2005
+SELECT student.student_id, student.student_name, student.dob
+FROM student
+where YEAR(dob)>2005;
+-- 11.Use LENGTH(student_name) to find the longest name student
+SELECT student.student_id,student.student_name,LENGTH(student.student_name) as name_length from student ORDER BY name_length DESC limit 1;
+
+-- 12.CASE Expression Tasks
+-- Write a query to categorize marks as:>=90 → "Outstanding"75–89 → "Excellent"60–74 → "Good"40–59 → "Pass"<40 → "Fail"Show each student with overall result:If all subjects ≥40 → "Pass" Else → "Fail"
+
+SELECT student.student_id, student.student_name, student_marks.subject, student_marks.marks,
+CASE
+WHEN student_marks.marks >= 90 THEN 'Outstanding'
+WHEN student_marks.marks >= 75 THEN 'Excellent'
+WHEN student_marks.marks >= 60 THEN 'Good'
+WHEN student_marks.marks >= 40 THEN 'Pass'
+ELSE 'Fail'
+END AS performance
+FROM student
+INNER JOIN student_marks  ON student.student_id = student_marks.student_id;
+-- 13.Show each student with overall result:If all subjects ≥40 → "Pass"Else → "Fail"
+SELECT student.student_id, student.student_name,
+CASE
+WHEN MIN(student_marks.marks) >= 40 THEN 'Pass'
+ELSE 'Fail'
+END AS overall_result
+FROM student 
+JOIN student_marks  ON student.student_id = student_marks.student_id
+GROUP BY student_id, student_name;
+-- 14.Create a query to display:
+-- Gender as "M → Male", "F → Female", "Other → Unknown" using CASE.
+
+SELECT student_id, student_name, gender,
+CASE 
+WHEN gender='M' THEN 'Male'
+WHEN gender='F' THEN 'Female'
+ELSE gender='Unknown'
+END AS gender_description
+FROM student;
+
+-- 15.Write a query to display scholarship eligibility:If average ≥85 → "Eligible"Else → "Not Eligible"
+select student.student_id,student_name,student_marks.marks,
+CASE
+WHEN AVG(student_marks.marks) >= 85 then "Eligible"
+else "Not Eligible"
+END AS scholarship
+FROM student 
+JOIN student_marks ON student.student_id = student_marks.student_id
+GROUP BY student_id, student_name;
