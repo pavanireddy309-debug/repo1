@@ -1,0 +1,44 @@
+CREATE TABLE student (
+    student_id INT PRIMARY KEY AUTO_INCREMENT,
+    student_name VARCHAR(100),
+    gender VARCHAR(10),
+    dob DATE,
+    class VARCHAR(20)
+);
+
+
+INSERT INTO student (student_name, gender, dob, class) VALUES
+('Aarav', 'Male', '2005-01-15', '10A'),
+('Ishaan', 'Male', '2005-03-22', '10A'),
+('Vihaan', 'Male', '2005-07-12', '10B'),
+('Diya', 'Female', '2005-11-05', '10B'),
+('Meera', 'Female', '2005-06-18', '10C');
+
+
+CREATE TABLE student_marks (
+    mark_id INT PRIMARY KEY AUTO_INCREMENT,
+    student_id INT,
+    subject VARCHAR(50),
+    marks INT,
+    exam_date DATE,
+    FOREIGN KEY (student_id) REFERENCES student(student_id)
+);
+
+
+INSERT INTO student_marks (student_id, subject, marks, exam_date) VALUES
+(1, 'Maths', 85, '2024-05-10'),
+(1, 'Science', 78, '2024-05-11'),
+(2, 'Maths', 45, '2024-05-10'),
+(2, 'English', 55, '2024-05-12'),
+(3, 'History', 62, '2024-05-13'),
+(3, 'Science', 70, '2024-05-11'),
+(4, 'Maths', 35, '2024-05-10'),
+(4, 'English', 42, '2024-05-12'),
+(5, 'Computer', 88, '2024-05-14');
+
+-- inner join
+select * from student inner join student_marks on student.student_id = student_marks.student_id;
+-- left join
+select * from student left join student_marks on student.student_id = student_marks.student_id;
+-- right join
+select * from student right join student_marks on student.student_id = student_marks.student_id;
